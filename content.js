@@ -44,57 +44,54 @@ const readStorage = async (keys) => {
 };
 
 const fetchResponse = async () => {
-  const storage = await readStorage(["apiKey", "selectedVoiceId", "mode"]);
-  const selectedVoiceId = storage.selectedVoiceId
-    ? storage.selectedVoiceId
-    : "21m00Tcm4TlvDq8ikWAM"; //fallback Voice ID
-  const mode = storage.mode
-              const model_id =
-    (mode === "eleven_v3_(alpha)" || mode === "eleven_v3") ? "eleven_v3" :
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_english_v1" || mode === "eleven_monolingual_v1") ? "eleven_monolingual_v1" :
-    "eleven_multilingual_v1"; // default
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_multilingual_v1" || mode === "eleven_multilingual_v1") ? "eleven_multilingual_v1" :
-    "eleven_monolingual_v1"; // default
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_english_v1" || mode === "eleven_monolingual_v1") ? "eleven_monolingual_v1" :
-    "eleven_multilingual_v1"; // default
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_multilingual_v1" || mode === "eleven_multilingual_v1") ? "eleven_multilingual_v1" :
-    "eleven_monolingual_v1"; // default
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_multilingual_v1" || mode === "eleven_multilingual_v1") ? "eleven_multilingual_v1" :
-    "eleven_monolingual_v1"; // default
-    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
-    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
-    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
-    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
-    (mode === "eleven_english_v1" || mode === "eleven_monolingual_v1") ? "eleven_monolingual_v1" :
-    "eleven_multilingual_v1"; // default
-      (mode === "multilingual" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
-        "eleven_turbo_v2_5";
+  const storage = await readStorage([
+    "apiKey", "selectedVoiceId", "mode", "provider", 
+    "openaiApiKey", "openaiVoice", "openaiModel"
+  ]);
+  const provider = storage.provider || "elevenlabs";
+
+  if (provider === "openai") {
+    return fetchOpenAIResponse(storage);
+  } else {
+    return fetchElevenLabsResponse(storage);
+  }
+};
+
+const fetchOpenAIResponse = async (storage) => {
+  const voice = storage.openaiVoice || "alloy";
+  const model = storage.openaiModel || "gpt-4o-mini-tts";
+  
+  const response = await fetch("https://api.openai.com/v1/audio/speech", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${storage.openaiApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: model,
+      input: textToPlay,
+      voice: voice,
+      response_format: "mp3",
+    }),
+  });
+  return response;
+};
+
+const fetchElevenLabsResponse = async (storage) => {
+  const selectedVoiceId = storage.selectedVoiceId || "21m00Tcm4TlvDq8ikWAM";
+  const mode = storage.mode || "eleven_turbo_v2_5";
+  
+  // Normalize model_id
+  const model_id = 
+    mode.includes("v3") ? "eleven_v3" :
+    mode.includes("multilingual_v2") ? "eleven_multilingual_v2" :
+    mode.includes("flash_v2_5") || mode.includes("flash_v2.5") ? "eleven_flash_v2_5" :
+    mode.includes("turbo_v2_5") || mode.includes("turbo_v2.5") ? "eleven_turbo_v2_5" :
+    mode.includes("turbo_v2") ? "eleven_turbo_v2" :
+    mode.includes("flash_v2") ? "eleven_flash_v2" :
+    mode.includes("monolingual") || mode.includes("english_v1") ? "eleven_monolingual_v1" :
+    mode.includes("multilingual_v1") ? "eleven_multilingual_v1" :
+    "eleven_turbo_v2_5";
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}/stream`,
@@ -118,16 +115,20 @@ const fetchResponse = async () => {
   return response;
 };
 
-const handleMissingApiKey = () => {
+
+const handleMissingApiKey = async () => {
+  const storage = await readStorage(["provider"]);
+  const provider = storage.provider || "elevenlabs";
+  const providerName = provider === "openai" ? "OpenAI" : "ElevenLabs";
+  
   setButtonState("speak");
   const audio = new Audio(chrome.runtime.getURL("media/error-no-api-key.mp3"));
   audio.play();
   //since alert() is blocking, timeout is needed so audio plays while alert is visible.
   setTimeout(() => {
     alert(
-      "Please set your Elevenlabs API key in the extension settings to use Human Reader."
+      `Please set your ${providerName} API key in the extension settings to use Human Reader.`
     );
-    chrome.storage.local.clear();
     setButtonState("play");
   }, 100);
 };
@@ -153,8 +154,11 @@ const stopAudio = () => {
 
 let sourceOpenEventAdded = false;
 const streamAudio = async () => {
-  const storage = await readStorage(["apiKey", "speed"]);
-  if (!storage.apiKey) {
+  const storage = await readStorage(["apiKey", "speed", "provider", "openaiApiKey"]);
+  const provider = storage.provider || "elevenlabs";
+  const hasApiKey = provider === "openai" ? storage.openaiApiKey : storage.apiKey;
+  
+  if (!hasApiKey) {
     handleMissingApiKey();
     return;
   }
