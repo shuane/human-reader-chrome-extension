@@ -337,7 +337,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "readOutLoud") {
     onClickTtsButton();
   }
-  return true
 });
 
 document.addEventListener("keydown", function (e) {

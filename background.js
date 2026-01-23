@@ -1,8 +1,9 @@
-
-chrome.contextMenus.create({
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.contextMenus.create({
     "id": "readOutLoud",
     "title": "Human Reader - Start reading",
     "contexts": ["selection"],
+  });
 });
 
 // Could be adde in future
