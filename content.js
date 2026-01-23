@@ -82,8 +82,15 @@ const fetchElevenLabsResponse = async (storage) => {
   const mode = storage.mode || "eleven_turbo_v2_5";
   
   // Normalize model_id
-    const model_id =
+      const model_id =
     (mode === "eleven_v3_(alpha)" || mode === "eleven_v3") ? "eleven_v3" :
+    (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
+    (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
+    (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
+    (mode === "eleven_turbo_v2" || mode === "eleven_turbo_v2") ? "eleven_turbo_v2" :
+    (mode === "eleven_flash_v2" || mode === "eleven_flash_v2") ? "eleven_flash_v2" :
+    (mode === "eleven_english_v1" || mode === "eleven_monolingual_v1") ? "eleven_monolingual_v1" :
+    "eleven_multilingual_v1"; // default
     (mode === "eleven_multilingual_v2" || mode === "eleven_multilingual_v2") ? "eleven_multilingual_v2" :
     (mode === "eleven_flash_v2.5" || mode === "eleven_flash_v2_5") ? "eleven_flash_v2_5" :
     (mode === "eleven_turbo_v2.5" || mode === "eleven_turbo_v2_5") ? "eleven_turbo_v2_5" :
